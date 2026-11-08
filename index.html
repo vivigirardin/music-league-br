@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquivo Music League NIVAists</title>
+<style>
+  :root {
+    --bg: #f7f6f2; --card: #ffffff; --text: #1d1d1f; --muted: #6b6b70;
+    --line: #e4e2dc; --accent: #1db954; --accent-ink: #0b6b2f; --warn: #b45309;
+    --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214; --card: #1c1c1f; --text: #ececee; --muted: #9a9aa2;
+      --line: #2c2c31; --accent: #1db954; --accent-ink: #5fe08d; --warn: #fbbf24;
+      --warn-bg: #3a2a07;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; }
+  /* logo.png is white: show it black on the light theme, white on the dark one */
+  .logo { height: 44px; width: auto; flex-shrink: 0; filter: invert(1); }
+  @media (prefers-color-scheme: dark) { .logo { filter: none; } }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .controls { position: sticky; top: 0; background: var(--bg); padding: 8px 0 12px; z-index: 1; }
+  input[type=search] {
+    width: 100%; padding: 14px 16px; font-size: 17px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none;
+  }
+  input[type=search]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .chip {
+    border: 1px solid var(--line); background: var(--card); color: var(--text);
+    padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer;
+  }
+  .chip[aria-pressed=true] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .label { color: var(--muted); font-size: 13px; }
+  .sort { margin-left: auto; color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .sort select {
+    font: inherit; color: var(--text); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px;
+  }
+  li.group {
+    display: block; background: none; border: none; padding: 16px 2px 4px; margin: 0;
+    font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  li.group .desc { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .count { margin-left: auto; color: var(--muted); font-size: 13px; }
+  .verdict { margin: 8px 0 4px; padding: 12px 16px; border-radius: 12px; font-weight: 600; display: none; }
+  .verdict.free { display: block; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent-ink); }
+  .verdict.taken { display: block; background: var(--warn-bg); color: var(--warn); }
+  ul { list-style: none; padding: 0; margin: 8px 0 0; }
+  li {
+    display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .title { font-weight: 600; }
+  .artist { color: var(--muted); font-size: 14px; }
+  .posts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .post {
+    font: inherit; font-size: 12px; color: var(--text); padding: 2px 8px; border-radius: 6px;
+    background: var(--bg); border: 1px solid var(--line); cursor: pointer;
+  }
+  .post:hover { border-color: var(--accent); color: var(--accent-ink); }
+  .verdict.info { display: block; background: var(--card); border: 1px solid var(--line); font-weight: 400; }
+  .verdict .desc { color: var(--muted); font-size: 14px; }
+  .repeat { font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 2px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 2px; }
+  a.play { color: var(--accent-ink); font-size: 13px; text-decoration: none; white-space: nowrap; }
+  a.play:hover { text-decoration: underline; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1><img src="logo.png" alt="" class="logo"> Arquivo de Músicas</h1>
+  <p class="sub">Pesquisem antes de submeter, seus cretinos!</p>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Buscar música, artista ou álbum…" autocomplete="off" autofocus>
+    <div class="filters" id="fields">
+      <span class="label">Buscar em:</span>
+      <button class="chip" data-field="all" aria-pressed="true">Tudo</button>
+      <button class="chip" data-field="title" aria-pressed="false">Música</button>
+      <button class="chip" data-field="artist" aria-pressed="false">Artista</button>
+      <button class="chip" data-field="round" aria-pressed="false">Rodada</button>
+      <label class="sort">Ordenar por
+        <select id="sort">
+          <option value="artist">Artista A–Z</option>
+          <option value="title">Música A–Z</option>
+          <option value="round">Rodada</option>
+          <option value="newest">Mais recentes</option>
+        </select>
+      </label>
+    </div>
+    <div class="filters" id="filters">
+      <button class="chip" data-season="all" aria-pressed="true">Todos os meses</button>
+      <button class="chip" id="repeats" aria-pressed="false">Enviadas mais de uma vez</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+  <ul id="list"></ul>
+  <footer id="footer"></footer>
+</main>
+
+<script src="songs.js"></script>
+<script>
+const fold = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const state = { q: "", field: "all", season: "all", repeats: false, sort: "artist" };
+const placeholders = {
+  all: "Buscar música, artista ou álbum…", title: "Buscar título da música…",
+  artist: "Buscar artista…", round: "Buscar nome da rodada…"
+};
+let songs = [];
+let roundInfo = {};
+let leagues = [];
+const leagueName = n => leagues[n - 1] || `Liga ${n}`;
+
+function load(data) {
+    if (!data) {
+      document.getElementById("list").innerHTML = "<li>Não foi possível carregar songs.js — rode build_songs.R primeiro.</li>";
+      return;
+    }
+    roundInfo = data.rounds || {};
+    leagues = data.leagues || [];
+    songs = data.songs.map(s => ({
+      ...s,
+      hay: {
+        all: fold(`${s.title} ${s.artist} ${s.album}`),
+        title: fold(s.title),
+        artist: fold(s.artist),
+        round: fold(s.posts.map(p => p.round).join(" | "))
+      }
+    }));
+    const filters = document.getElementById("filters");
+    const repeatsBtn = document.getElementById("repeats");
+    for (let n = 1; n <= leagues.length; n++) {
+      const b = document.createElement("button");
+      b.className = "chip"; b.dataset.season = n; b.textContent = leagueName(n);
+      b.setAttribute("aria-pressed", "false");
+      filters.insertBefore(b, repeatsBtn);
+    }
+    document.getElementById("footer").textContent =
+      `${songs.length} músicas únicas · última atualização ${data.updated}`;
+    render();
+}
+
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; render(); });
+document.getElementById("sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+
+// Round order within a season = order of the rounds in rounds.csv
+const roundIndex = p => Object.keys(roundInfo[p.season] || {}).indexOf(p.round);
+// The post a song is sorted/grouped by: its first one in the selected season
+const mainPost = s => s.posts.find(p => state.season === "all" || String(p.season) === state.season) || s.posts[0];
+const byText = (a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" });
+const sorters = {
+  artist: (a, b) => byText(a.artist, b.artist) || byText(a.title, b.title),
+  title: (a, b) => byText(a.title, b.title) || byText(a.artist, b.artist),
+  round: (a, b) => {
+    const pa = mainPost(a), pb = mainPost(b);
+    return pa.season - pb.season || roundIndex(pa) - roundIndex(pb) || byText(a.artist, b.artist);
+  },
+  newest: (a, b) => mainPost(b).date.localeCompare(mainPost(a).date)
+};
+let sortBeforeRound = null;
+function setSort(sort) {
+  state.sort = sort;
+  document.getElementById("sort").value = sort;
+}
+function setField(field) {
+  // Searching by round sorts by round; leaving it restores the previous sort
+  if (field === "round" && state.field !== "round") {
+    sortBeforeRound = state.sort;
+    setSort("round");
+  } else if (field !== "round" && state.field === "round" && sortBeforeRound) {
+    if (state.sort === "round") setSort(sortBeforeRound);
+    sortBeforeRound = null;
+  }
+  state.field = field;
+  document.querySelectorAll("[data-field]").forEach(x =>
+    x.setAttribute("aria-pressed", x.dataset.field === field));
+  document.getElementById("q").placeholder = placeholders[field];
+}
+function setSeason(season) {
+  state.season = String(season);
+  document.querySelectorAll("#filters [data-season]").forEach(x =>
+    x.setAttribute("aria-pressed", x.dataset.season === state.season));
+}
+
+document.getElementById("fields").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  setField(b.dataset.field);
+  document.getElementById("q").focus();
+  render();
+});
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.id === "repeats") {
+    state.repeats = !state.repeats;
+    b.setAttribute("aria-pressed", state.repeats);
+  } else {
+    setSeason(b.dataset.season);
+  }
+  render();
+});
+// Clicking a round tag on a song shows every song from that round
+document.getElementById("list").addEventListener("click", e => {
+  const b = e.target.closest("button.post");
+  if (!b) return;
+  setField("round");
+  setSeason(b.dataset.season);
+  const q = document.getElementById("q");
+  q.value = state.q = b.dataset.round;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  render();
+});
+
+function render() {
+  const terms = fold(state.q).split(/\s+/).filter(Boolean);
+  const hits = songs.filter(s =>
+    terms.every(t => s.hay[state.field].includes(t)) &&
+    (state.season === "all" || s.posts.some(p => String(p.season) === state.season)) &&
+    (!state.repeats || s.posts.length > 1)).sort(sorters[state.sort]);
+
+  document.getElementById("count").textContent = `${hits.length} música${hits.length === 1 ? "" : "s"}`;
+
+  const verdict = document.getElementById("verdict");
+  verdict.className = "verdict";
+  if (state.field === "round" && terms.length) {
+    const names = new Set(hits.flatMap(s => s.posts
+      .filter(p => (state.season === "all" || String(p.season) === state.season) &&
+                   terms.every(t => fold(p.round).includes(t)))
+      .map(p => `${p.season}|${p.round}`)));
+    if (names.size === 1) {
+      const [season, round] = [...names][0].split("|");
+      const desc = (roundInfo[season] || {})[round];
+      verdict.className = "verdict info";
+      verdict.innerHTML = `<strong>${esc(leagueName(season))} · ${esc(round)}</strong>` +
+        (desc ? `<br><span class="desc">${esc(desc)}</span>` : "");
+    }
+  } else if (terms.length && state.season === "all" && !state.repeats) {
+    if (hits.length === 0) {
+      verdict.className = "verdict free";
+      verdict.textContent = state.field === "artist"
+        ? "✅ Nenhuma música deste artista foi enviada ainda!"
+        : "✅ Nenhum resultado — parece que ninguém enviou essa ainda!";
+    } else if (state.field === "artist") {
+      verdict.className = "verdict taken";
+      verdict.textContent = `🎤 ${hits.length} música${hits.length === 1 ? "" : "s"} de artistas correspondentes já ${hits.length === 1 ? "foi enviada" : "foram enviadas"}:`;
+    } else if (hits.length <= 3) {
+      verdict.className = "verdict taken";
+      verdict.textContent = "⚠️ Atenção — talvez essa já tenha sido enviada:";
+    }
+  }
+
+  let lastGroup = null;
+  document.getElementById("list").innerHTML = hits.map(s => {
+    let header = "";
+    if (state.sort === "round") {
+      const p = mainPost(s), group = `${p.season}|${p.round}`;
+      if (group !== lastGroup) {
+        lastGroup = group;
+        const desc = (roundInfo[p.season] || {})[p.round];
+        header = `<li class="group">${esc(leagueName(p.season))} · ${esc(p.round)}` +
+          (desc ? `<span class="desc">${esc(desc)}</span>` : "") + `</li>`;
+      }
+    }
+    return header + `
+    <li>
+      <div>
+        <div class="title">${esc(s.title)}${s.posts.length > 1 ? `<span class="repeat">×${s.posts.length}</span>` : ""}</div>
+        <div class="artist">${esc(s.artist)} · ${esc(s.album)}</div>
+      </div>
+      <a class="play" href="https://open.spotify.com/track/${esc(s.spotify)}" target="_blank" rel="noopener">Abrir no Spotify ↗</a>
+      <div class="posts">${s.posts.map(p => {
+        const desc = (roundInfo[p.season] || {})[p.round];
+        const tip = `${desc ? desc + "\n" : ""}Enviada em ${p.date} · clique para ver a rodada inteira`;
+        return `<button class="post" data-season="${p.season}" data-round="${esc(p.round)}" title="${esc(tip)}">${esc(leagueName(p.season))} · ${esc(p.round)}</button>`;
+      }).join("")}</div>
+    </li>`;
+  }).join("");
+}
+
+// Last, so everything above is defined before the first render
+load(window.SONG_DATA);
+</script>
+</body>
+</html>
